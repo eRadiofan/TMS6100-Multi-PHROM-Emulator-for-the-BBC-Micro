@@ -1,0 +1,5 @@
+PCB/TMS6100_Emu/Production/*
+PCB/TMS6100_Emu/*-backups/*
+PCB/TMS6100_Emu/fp-info-cache
+PCB/TMS6100_Emu/*.bak
+Firmware/TMS6100_STM32G051/Release/
