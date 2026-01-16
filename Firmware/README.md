@@ -1,5 +1,7 @@
 # Firmware
 
-This project uses a STM32G051F8P6 MCU mostly because I had some spare in my parts drawer. The code could be migrated to a new project configured for STM32G031F8P6 or STM32C051F8P6 using the same pin names, pin and clock configuration.
+These are STM32CubeIDE version 2 projects.
 
-Once a new project is generated with STM32CubeMX, you can delete main.c and stm32g0xx_it.c since the code originally in these sections now reside elsewhere.
+There are currently two projects defined, one for the STM32G031F8P6 and one for the STM32G051F8P6. Code common to both is in the Common folder.
+
+The first 3 emulators produced were STM32G051F8P6 because that is what I had spare in my parts drawer. STM32C051F8P6 is also suitable but it seems these are in short supply.
