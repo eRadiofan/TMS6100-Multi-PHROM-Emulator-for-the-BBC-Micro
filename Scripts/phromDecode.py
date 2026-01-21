@@ -2,6 +2,7 @@
 # Program for decoding TMS6100 phrase ROMs
 #   and generating understandable C data for use in an emulator
 #
+# Radiofan, 2026
 import sys
 
 # Read all the data
@@ -41,9 +42,27 @@ def validNameChar(ch):
 
 # Data type to hold a phrase name in the Acorn format PHROM
 class phraseNameEnt:
-  def __init__(self, pointer, name):
+  def __init__(self, pointer, name, phrLen = 0):
     self.pointer = pointer
     self.name = name
+    self.phrLen = phrLen
+
+def ptrKey(obj):
+  return obj.pointer
+
+def uniq(ents):
+  ri = 0
+  res = []
+  prevKey = 0
+  for p in range(len(ents)):
+    key = ents[p].pointer
+    if (key == prevKey):
+      res[ri-1].name += ", "+ents[p].name
+    else:
+      res.append(ents[p])
+      ri += 1
+    prevKey = key
+  return res
 
 # Bitwise functions and phrase parsing code
 def bitsInit(start):
@@ -82,7 +101,7 @@ def parseFrame(debug=False):
   if (debug):
     print("// Energy:", f'0x{energy:1x}', end=" ")
   if (energy == 0):
-    return 0
+    return 1
   if (energy == 0xF):
     return -1
   rept = getBits(1)
@@ -148,6 +167,7 @@ def skip_byte():
   print(f'  0x{fileContent[addr]:02x},')
   return
 
+rType = fileContent[0]
 dataFlag = fileContent[1]
 
 if (dataFlag == 0 or dataFlag == 0xFF):
@@ -220,7 +240,54 @@ if (dataFlag == 0 or dataFlag == 0xFF):
   #for p in range(ptrs_len):
   #  print(f'  {p:3d}', f'0x{phraseNameEnts[p].pointer:04x} ', phraseNameEnts[p].name.decode('ascii'))
 
-elif (fileContent[0] != 0):
+elif (rType == 0x55):
+  # TI-99 indexed format
+  nPtrs = 373
+  print("const uint8_t PHROMdata[] = {\n ", bout(0)+", // Type:", f'0x{rType:02x}')
+  indexStart = 1
+  ## Show phrase words and addresses
+  ptrs = []
+  ixPtr = indexStart
+  prevPtr = indexStart
+  for w in range(nPtrs):
+    wl = reversed[ixPtr]
+    ixPtr += 1
+    word = reversed[ixPtr:ixPtr+wl].decode('ascii')
+    ixPtr += wl
+    data = reversed[ixPtr:ixPtr+8] # the purpose of these first 4 bytes is unknown
+    if (data[4] != 0):
+      raise Exception("Error parsing data, index byte 5 is not zero")
+    ptr = get_pointer(data[6],data[5]) # Byte order reversed WRT indirect indexing
+    phrLen = data[7]
+    ptrs.append(phraseNameEnt(ptr, word, phrLen))
+    ePtr = ixPtr + 8
+    dout(prevPtr,ePtr, "// Phrase "+f'{w:03d}: ' + word + f' -> 0x{ptr:04x}')
+    prevPtr = ixPtr = ePtr
+  ptrs_s = list(ptrs)
+  ptrs_s.sort(key=ptrKey)
+  ptrs_sorted = uniq(ptrs_s)
+  ptrs_len = len(ptrs_sorted)
+  print("  // Unique phrases:", ptrs_len)
+  for p in range(ptrs_len):
+    if (p < ptrs_len-1):
+      e = ptrs_sorted[p+1].pointer
+    else:
+      e = reversed.find(0, ptrs_sorted[p].pointer)
+      if (e < 0):
+        e = 0x8000
+    s = ptrs_sorted[p].pointer
+    if (e-s != ptrs_sorted[p].phrLen):
+      raise Exception("Error parsing data, length field differs", e-s, "vs", ptrs_sorted[p].phrLen)
+    if (not validStartFrame(s)):
+      raise Exception("Error parsing data, start frame is not valid", f'0x{s:04x}')
+    ep = parsePhrase(s)
+    print("  /*", f'0x{s:04x}', ptrs_sorted[p].name, "*/")
+    if (e>s):
+      dout(s, e, '// ->'+f'0x{ep:04x}')
+  print("  /*", f'0x{e:04x}', "*/")
+  print('};')
+
+elif (rType != 0):
   # Unindexed PHROM
   print("const uint8_t PHROMdata[] = {")
   addr = 0

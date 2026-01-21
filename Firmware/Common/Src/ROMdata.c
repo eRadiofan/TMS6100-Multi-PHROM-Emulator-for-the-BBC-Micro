@@ -45,6 +45,15 @@ static volatile uint8_t outputBitIndex;
 static volatile rd_state readState = RD_INIT;
 static volatile int8_t addrCount = 0;
 
+#ifdef PHROMS_TI99
+static const int8_t PHROM_idx[16] = {1,2,-1,-1,3,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0};
+static const PHROM_desc PHROMs[N_PHROMS] = {
+  { phromData_Acorn, 0x4000, DLEN_ACORN},
+  { phromData_TI99, 0x4000, 0x4000},
+  { &phromData_TI99[0x4000], 0x4000, DLEN_USA % 0x4000},
+  { PHROMdata_Clock, 0x1000, DLEN_CLOCK}
+};
+#else
 static const int8_t PHROM_idx[16] = {1,-1,3,-1,2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0};
 static const PHROM_desc PHROMs[N_PHROMS] = {
   { phromData_Acorn, 0x4000, DLEN_ACORN},
@@ -52,6 +61,7 @@ static const PHROM_desc PHROMs[N_PHROMS] = {
   { PHROMdata_Clock, 0x1000, DLEN_CLOCK},
   { PHROMdata_Mil, 0x4000, DLEN_Milit}
 };
+#endif
 
 static inline void GPIO_Dout(void) {
   if (!outputEnabled) {
