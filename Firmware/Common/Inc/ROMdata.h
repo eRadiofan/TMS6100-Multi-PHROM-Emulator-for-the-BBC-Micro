@@ -5,21 +5,21 @@
  *  Author: Radiofan
  */
 
-//#define PHROMS_TI99
+#define PHROMS_TI99
 
 #define N_PHROMS 4
 
 #define DLEN_ACORN 0x4000
-#define DLEN_USA 0x3ede
+#define DLEN_USA   0x3ede
 #define DLEN_CLOCK 0x0f73
 #define DLEN_Milit 0x3d96
-#define DLEN_TI99 0x7ed4
+#define DLEN_TI99  0x7ed5
 
-extern const unsigned char phromData_Acorn[DLEN_ACORN];
-extern const unsigned char phromData_USA[DLEN_USA];
-extern const unsigned char PHROMdata_Clock[DLEN_CLOCK];
-extern const unsigned char PHROMdata_Mil[DLEN_Milit];
-extern const unsigned char phromData_TI99[DLEN_TI99];
+extern const uint8_t phromData_Acorn[DLEN_ACORN];
+extern const uint8_t phromData_USA[DLEN_USA];
+extern const uint8_t PHROMdata_Clock[DLEN_CLOCK];
+extern const uint8_t PHROMdata_Mil[DLEN_Milit];
+extern const uint8_t phromData_TI99[DLEN_TI99];
 
 typedef struct PHROM_desc {
   const unsigned char *address;
@@ -36,4 +36,3 @@ typedef enum __attribute__((packed)) {
 } rd_state;
 
 extern volatile uint8_t active;
-

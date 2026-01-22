@@ -1,6 +1,6 @@
 #
 # Program for decoding TMS6100 phrase ROMs
-#   and generating understandable C data for use in an emulator
+#  and generating understandable C data for use in an emulator
 #
 # Radiofan, 2026
 import sys
@@ -143,7 +143,7 @@ def bout(addr):
   return f'0x{fileContent[addr]:02x}'
 
 # Output data between indices, breaking line every 16 values,
-#   with optional comment at start of block
+#  with optional comment at start of block
 def dout(start, end, comment=None):
   print(" ", end=" ")
   s = start
@@ -213,6 +213,7 @@ if (dataFlag == 0 or dataFlag == 0xFF):
   for p in range(ptrs_len):
     s = ptrs_sorted[p]
     name = bytearray()
+    # Read string backwards from the index entry
     while (validNameChar(reversed[s-1])):
       s -= 1;
       c = getNameChar(reversed[s]);
@@ -237,6 +238,7 @@ if (dataFlag == 0 or dataFlag == 0xFF):
     dout(ptrs_sorted[p], e)
   print("  /*", f'0x{e:04x}', "*/")
   print('};')
+  # List the phrases and their addresses
   #for p in range(ptrs_len):
   #  print(f'  {p:3d}', f'0x{phraseNameEnts[p].pointer:04x} ', phraseNameEnts[p].name.decode('ascii'))
 
@@ -261,6 +263,7 @@ elif (rType == 0x55):
     phrLen = data[7]
     ptrs.append(phraseNameEnt(ptr, word, phrLen))
     ePtr = ixPtr + 8
+    #print("  /*", f'0x{prevPtr:04x}', "*/", end="")
     dout(prevPtr,ePtr, "// Phrase "+f'{w:03d}: ' + word + f' -> 0x{ptr:04x}')
     prevPtr = ixPtr = ePtr
   ptrs_s = list(ptrs)
@@ -294,7 +297,7 @@ elif (rType != 0):
   count = 0
   while (addr < fileLen-1):
     if (addr > 0):
-      # For some reason, each phrase is separated by a random byte
+      # For some reason, each phrase is separated by a random? byte
       skip_byte()
       addr += 1
     # Check validity of the phrase start frame
@@ -320,7 +323,7 @@ else:
   nPtrs = dataFlag
   print("const uint8_t PHROMdata[] = {\n ", bout(0)+",", bout(1)+", // Format type, No. of phrases:", nPtrs)
   indexStart = 2
-  ## Show phrase addresses
+  # Show phrase addresses
   ptrs = []
   for w in range(nPtrs):
     a = indexStart+w*2
@@ -328,11 +331,11 @@ else:
     pWord = get_pointer(fileContent[a], fileContent[b])
     dout(a,b+1, "// Phrase "+f'{w:03d}'+" @ "+f'0x{pWord:04x}')
     ptrs.append(pWord)
-  ## Sort the pointers
+  # Sort the pointers
   ptrs_sorted = list(set(ptrs))
   ptrs_sorted.sort();
   ptrs_len = len(ptrs_sorted)
-  ## Show phrase data
+  # Show phrase data
   for p in range(len(ptrs_sorted)):
     if (p < len(ptrs_sorted)-1):
       e = ptrs_sorted[p+1]

@@ -1,10 +1,10 @@
 #BASIC Utilities
 
-Here are tokenised BASIC2 utility programs intended to run on the BBC Micro model A/B. They are described as follows:
+Here are some BASIC2 utility programs intended to run on the BBC Micro model A/B, they are provided as text and in tokenised form. A description of each follows:
 
 1. SP-RAM - Speaks a phrase from RAM to test a standalone TMS5220. Taken from the Acorn speech system user guide, it saves some typing.
 
-2. SPHRASE - Speaks phrases from PHROMs. Enter the PHROM bank number followed by the phrase number and it speaks. Entering -1 will speak all phrases in the selected PHROM. Press the return key to repeat. The program contains index data for PHROM bank 2 (VM61004 which is non-indexed) so that phrases are easy to select. The program contains an indirectly addressed speak function as well a directly addressed speak function.
+2. SPHRASE - Speaks phrases from PHROMs. Enter the PHROM bank number followed by the phrase number and it speaks. Entering -1 will speak all phrases in the selected PHROM. Press the return key to repeat the previous selection. The program contains index data for PHROM bank 2 (VM61004 which is non-indexed) so that phrases are easy to select. It will detect the TI-99 build option and function accordingly. For reference and experimentation, the program contains an indirectly addressed speak function as well as a directly addressed speak function.
 
 3. SBOUNDS - This is a test program to check various edge cases when using the milti-PHROM. In particular:
 

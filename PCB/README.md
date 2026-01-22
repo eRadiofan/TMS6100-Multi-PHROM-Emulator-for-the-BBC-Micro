@@ -8,4 +8,8 @@ The PCB has a placeholder for JLCPCB order number, select the correct options wh
 
 Folder AD2_Tests contains Digilent Waveforms workspace configurations for Analog Discovery 2 that were used to test basic read functionality before putting it into the micro.
 
+
 ![Schematic](Schematic.png)
+
+
+![AD2 test setup](AD2_Tests/AD2_Test.JPG)
