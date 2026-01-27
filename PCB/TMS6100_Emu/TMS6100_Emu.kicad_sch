@@ -5262,7 +5262,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "1K2"
+		(property "Value" "2K2"
 			(at 183.642 49.53 90)
 			(effects
 				(font

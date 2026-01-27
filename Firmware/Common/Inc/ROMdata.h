@@ -5,7 +5,7 @@
  *  Author: Radiofan
  */
 
-#define PHROMS_TI99
+//#define PHROMS_TI99
 
 #define N_PHROMS 4
 
