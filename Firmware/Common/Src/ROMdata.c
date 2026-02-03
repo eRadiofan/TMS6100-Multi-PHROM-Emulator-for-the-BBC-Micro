@@ -54,12 +54,13 @@ static const PHROM_desc PHROMs[N_PHROMS] = {
   { PHROMdata_Clock, 0x1000, DLEN_CLOCK}
 };
 #else
-static const int8_t PHROM_idx[16] = {1,-1,3,-1,2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0};
+static const int8_t PHROM_idx[16] = {1,-1,3,-1,2,-1,-1,-1,-1,-1,4,-1,-1,-1,-1,0};
 static const PHROM_desc PHROMs[N_PHROMS] = {
   { phromData_Acorn, 0x4000, DLEN_ACORN},
   { phromData_USA, 0x4000, DLEN_USA},
   { PHROMdata_Clock, 0x1000, DLEN_CLOCK},
-  { PHROMdata_Mil, 0x4000, DLEN_Milit}
+  { PHROMdata_Mil, 0x4000, DLEN_Milit},
+  { phromData_StarWars, 0x2000, DLEN_StarWars}
 };
 #endif
 
