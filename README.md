@@ -6,7 +6,7 @@ This project contains the PCB design and firmware for a TMS6100 emulator, accomm
 * VM61002 - the PHROM fitted to Acorn computer speech kits sold in the USA (American male voice, indexed phrases), bank 0
 * VM10004 - military radio phrases (American male voice, non-indexed phrases), bank 2
 * VM71003 - talking clock (American female voice, indexed phrases), bank 4
-* Star Wars arcade game prases - from firmware version 1.1 onwards, courtesy of [nmikstas on github]((https://nmikstas.github.io/portfolio/swAudio/swAudio.html), who provided [a full dissassembly of the speech ROM](https://github.com/nmikstas/star-wars-arcade-audio/blob/master/Star_Wars_Sound_ROM.asm). Presented on bank 10.
+* Star Wars arcade game prases - from firmware version 1.1 onwards, courtesy of [nmikstas on github](https://nmikstas.github.io/portfolio/swAudio/swAudio.html), who provided [a full dissassembly of the speech ROM](https://github.com/nmikstas/star-wars-arcade-audio/blob/master/Star_Wars_Sound_ROM.asm). Presented on bank 10.
 
 There is also a build option in Firmware/Common/Inc/ROMdata.h to make the following selection:
 
