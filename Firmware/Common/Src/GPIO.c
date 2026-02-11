@@ -10,27 +10,14 @@
 
 void GPIO_Init_Add8_D(uint32_t Mode) {
   // Optimised for quick configuration of this specific pin
-  GPIO_TypeDef  *GPIOx = GPIOA;
   uint32_t position = 4; // ADD8_Data_Pin = 2
   uint32_t temp;
 
-  /* Check the parameters */
-  assert_param(IS_GPIO_ALL_INSTANCE(GPIOx));
-  assert_param(IS_GPIO_MODE(Mode));
-
-  if ((Mode & GPIO_MODE) == MODE_OUTPUT) {
-    /* Configure the IO Output Type */
-    temp = GPIOx->OTYPER;
-    temp &= ~(GPIO_OTYPER_OT0 << position);
-    temp |= (((Mode & OUTPUT_TYPE) >> OUTPUT_TYPE_Pos) << position);
-    GPIOx->OTYPER = temp;
-  }
-
   /* Configure IO Direction mode (Input, Output, etc) */
-  temp = GPIOx->MODER;
+  temp = GPIOA->MODER;
   temp &= ~(GPIO_MODER_MODE0 << (position * 2u));
   temp |= ((Mode & GPIO_MODE) << (position * 2u));
-  GPIOx->MODER = temp;
+  GPIOA->MODER = temp;
 }
 
 void GPIO_Init(void) {

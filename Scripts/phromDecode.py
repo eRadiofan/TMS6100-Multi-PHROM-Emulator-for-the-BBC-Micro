@@ -256,15 +256,24 @@ elif (rType == 0x55):
     ixPtr += 1
     word = reversed[ixPtr:ixPtr+wl].decode('ascii')
     ixPtr += wl
-    data = reversed[ixPtr:ixPtr+8] # the purpose of these first 4 bytes is unknown
+    data = reversed[ixPtr:ixPtr+8]
     if (data[4] != 0):
       raise Exception("Error parsing data, index byte 5 is not zero")
+    # The first 4 bytes are pointers of a binary tree
+    ptrL = get_pointer(data[1],data[0])
+    ptrR = get_pointer(data[3],data[2])
+    if (ptrL > 0):
+      btPtrStr = f'L:0x{ptrL:04x} '
+    else:
+      btPtrStr = ""
+    if (ptrR > 0):
+      btPtrStr = btPtrStr + f'R:0x{ptrR:04x}'
     ptr = get_pointer(data[6],data[5]) # Byte order reversed WRT indirect indexing
     phrLen = data[7]
     ptrs.append(phraseNameEnt(ptr, word, phrLen))
     ePtr = ixPtr + 8
-    #print("  /*", f'0x{prevPtr:04x}', "*/", end="")
-    dout(prevPtr,ePtr, "// Phrase "+f'{w:03d}: ' + word + f' -> 0x{ptr:04x}')
+    print("  /*", f'0x{prevPtr:04x}', "*/", end="")
+    dout(prevPtr,ePtr, "// Phrase "+f'{w:03d}: ' + word + f' -> 0x{ptr:04x} ' + btPtrStr)
     prevPtr = ixPtr = ePtr
   ptrs_s = list(ptrs)
   ptrs_s.sort(key=ptrKey)

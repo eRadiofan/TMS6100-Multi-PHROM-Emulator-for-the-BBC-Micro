@@ -13,7 +13,7 @@
 #define DLEN_USA   0x3ede
 #define DLEN_CLOCK 0x0f73
 #define DLEN_Milit 0x3d96
-#define DLEN_TI99  0x7ed5
+#define DLEN_TI99  0x7ed4
 #define DLEN_StarWars (0x17DE + 213)
 
 extern const uint8_t phromData_Acorn[DLEN_ACORN];
