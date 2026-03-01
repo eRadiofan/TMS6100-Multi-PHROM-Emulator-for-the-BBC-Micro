@@ -4,6 +4,7 @@
 #
 # Radiofan, 2026
 import sys
+showVariableFormat = False
 
 # Read all the data
 with open(sys.argv[1], mode='rb') as file: # b is important -> binary
@@ -64,6 +65,42 @@ def uniq(ents):
     prevKey = key
   return res
 
+# Bitwise functions for conversion to stream variable rate
+def vfOutInit():
+  global vb_d, vb_data, vb_count
+  vb_d = 0
+  vb_count = 0
+  vb_data = []
+
+def vfPushBit(b):
+  global vb_d, vb_data, vb_count
+  vb_d = (vb_d << 1) | b
+  vb_count += 1
+  if (vb_count > 7):
+    vb_data.append(vb_d)
+    vb_count = 0
+    vb_d = 0
+
+def vfPushBits(d, n):
+  for i in range(n-1,-1,-1):
+    bit = (d & (1 << i)) > 0
+    vfPushBit(bit)
+
+def varablePhraseOut():
+  global vb_d, vb_data, vb_count
+  if (vb_count > 0):
+    vb_data.append(vb_d)
+  end = len(vb_data)
+  s = 0
+  while s < end:
+    e = s + 8
+    if (e > end):
+      e = end
+    print(" ", end=" ")
+    print(' '.join('{:d},'.format(x) for x in vb_data[s:e]))
+    s = e
+  return
+
 # Bitwise functions and phrase parsing code
 def bitsInit(start):
   global b_addr, b_data, b_count
@@ -71,6 +108,7 @@ def bitsInit(start):
   b_data = fileContent[start]
   b_count = 0
   #print("Byte:", f'0x{b_data:02x}', end=" ")
+  vfOutInit()
 
 def getBit():
   global b_addr, b_data, b_count
@@ -93,13 +131,15 @@ def getBits(n):
   for i in range(n):
     d = (d << 1) | getBit()
   #print("getBits:", n, d)
+  vfPushBits(d, n);
   return d
 
 # returns 1 if valid start frame, -1 of stop frame, 0 otherwise
 def parseFrame(debug=False):
+  vfPushBits(0, 2)
   energy = getBits(4)
   if (debug):
-    print("// Energy:", f'0x{energy:1x}', end=" ")
+    print(f'  // Energy=0x{energy:1x}', end=" ")
   if (energy == 0):
     return 1
   if (energy == 0xF):
@@ -107,32 +147,40 @@ def parseFrame(debug=False):
   rept = getBits(1)
   pitch = getBits(6)
   if (debug):
-    print("Repeat:", rept, "Pitch:", pitch, end=" ")
+    print(f'Repeat={rept:1d} Pitch={pitch:d}', end=" ")
   if (rept):
     return 0
-  K14 = getBits(18)
+  K1 = getBits(5)
+  K2 = getBits(5)
+  K34 = getBits(8)
   if (debug):
-    print("K1-K4:", f'0x{K14:04x}', end=" ")
+    print(f'K1=0x{K1:02x} K2=0x{K2:02x} K3,K4=0x{K34:02x}', end=" ")
   if (pitch != 0):
-    K510 = getBits(21)
+    K56 = getBits(8)
+    K78 = getBits(7)
+    K910 = getBits(6)
     if (debug):
-      print("K5-K10:", f'0x{K510:04x}', end=" ")
+      print(f'K5,K6=0x{K56:02x} K7,K8=0x{K78:02x} K9,K10=0x{K910:02x}', end=" ")
   return 1
 
 def validStartFrame(start):
   bitsInit(start)
   res = parseFrame(False)
-  #print()
   return (res == 1)
 
-def parsePhrase(start):
+def parsePhrase(start, debug=False):
+  nFrames = 0
   global b_addr, b_count
-  #print("Address:", f'{start:04x}')
   bitsInit(start)
   while (b_addr < fileLen-1):
-    res = parseFrame()
+    res = parseFrame(debug)
+    if (debug):
+      print()
     if (res == -1):
       break
+    nFrames += 1
+  if (debug):
+    print(f'  // {nFrames:d} frames')
   if (b_count == 0):
     return b_addr
   else:
@@ -234,8 +282,12 @@ if (dataFlag == 0 or dataFlag == 0xFF):
     print("  /*", f'0x{s:04x}', "*/", end="")
     dout(s,ptrs_sorted[p],"// "+phraseNameEnts[p].name.decode('ascii'))
     # Phrase data
-    print("  /*", f'0x{ptrs_sorted[p]:04x}', "*/")
-    dout(ptrs_sorted[p], e)
+    s = ptrs_sorted[p];
+    if (not validStartFrame(s)):
+      raise Exception("Error parsing data, frame is not valid")
+    print("  /*", f'0x{s:04x}', "*/")
+    # parsePhrase(s, True);
+    dout(s, e)
   print("  /*", f'0x{e:04x}', "*/")
   print('};')
   # List the phrases and their addresses
@@ -321,6 +373,10 @@ elif (rType != 0):
     if (e-addr > 1):
       print("  /*", f'0x{addr:04x}', "*/")
       dout(addr, e)
+      if (showVariableFormat):
+        print("/*")
+        varablePhraseOut()
+        print("*/")
     else:
       print(f'  0x{fileContent[addr]:02x},')
     addr = e
