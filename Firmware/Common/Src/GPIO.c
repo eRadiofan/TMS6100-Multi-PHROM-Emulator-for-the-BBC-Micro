@@ -8,6 +8,10 @@
 #include "stdbool.h"
 #include "GPIO.h"
 
+#ifndef GPIO_MODE
+#define GPIO_MODE (0x00000003U)
+#endif
+
 void GPIO_Init_Add8_D(uint32_t Mode) {
   // Optimised for quick configuration of this specific pin
   uint32_t position = 4; // ADD8_Data_Pin = 2
@@ -57,9 +61,11 @@ void GPIO_Init(void) {
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  // EXTI interrupts
+  // EXTI interrupts, Pin 15 on the STM32C051F8 is different, cannot use EXTI2, use EXTI8 instead
+#ifndef STM32C051xx
   HAL_NVIC_SetPriority(EXTI2_3_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(EXTI2_3_IRQn);
+#endif
   HAL_NVIC_SetPriority(EXTI4_15_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
 }

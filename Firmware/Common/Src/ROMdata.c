@@ -218,10 +218,38 @@ static inline void M1_Indirect_Handler() {
 
 static volatile uint8_t tms_command = 0;
 
+static inline void clock_handler(void) {
+  if (__HAL_GPIO_EXTI_GET_FALLING_IT(TMS_CLK_Pin) != 0x00u) {
+    __HAL_GPIO_EXTI_CLEAR_FALLING_IT(TMS_CLK_Pin);
+    if (tms_command == TMS_M0_DUMMY) {
+      M0_Dummy_Handler();
+    } else if (tms_command == TMS_M1_ADDR) {
+      M1_LoadAddress_Handler();
+    } else if (tms_command == TMS_M0_INCP) {
+      M0_IncPointer();
+    } else if (tms_command == (TMS_M0_DUMMY | TMS_M1_ADDR)) {
+      M1_Indirect_Handler();
+    } else if (tms_command == (TMS_M0_INCP | TMS_M1_ADDR)) {
+      // Bad indirect address, reset
+      readState = RD_INIT;
+    } else {
+      GPIO_ClrPin(GPIOA, LED_Green_Pin);
+      GPIO_ClrPin(GPIOA, LED_Red_Pin);
+    }
+    tms_command = TMS_NONE;
+  }
+}
+
 /* M0_READ / M1_ADDR handler, must complete within 3.125uS (100 clock cycles at 32MHz)
  * ISR compiles to 85 instructions, should be OK
  */
 void EXTI4_15_IRQHandler(void) {
+
+#ifdef STM32C051xx
+  // Pin 15 on the STM32C051F8 is different, cannot use EXTI2, use EXTI8 instead
+  clock_handler();
+#endif
+
   if (__HAL_GPIO_EXTI_GET_RISING_IT(M1_Pin) != 0x00u) {
     __HAL_GPIO_EXTI_CLEAR_RISING_IT(M1_Pin);
     GPIO_SetPin(GPIOA, LED_Red_Pin);
@@ -264,6 +292,8 @@ void EXTI4_15_IRQHandler(void) {
   }
 }
 
+#ifndef STM32C051xx
+
 /* ISR to handle falling edge of clock
  * We execute commands, inputs should be stable at this point.
  * Must complete within 3.125uS (100 clock cycles at 32MHz)
@@ -274,23 +304,8 @@ void EXTI2_3_IRQHandler(void) {
   if (__HAL_GPIO_EXTI_GET_RISING_IT(TMS_CLK_Pin) != 0x00u)
     __HAL_GPIO_EXTI_CLEAR_RISING_IT(TMS_CLK_Pin);
 
-  if (__HAL_GPIO_EXTI_GET_FALLING_IT(TMS_CLK_Pin) != 0x00u) {
-    __HAL_GPIO_EXTI_CLEAR_FALLING_IT(TMS_CLK_Pin);
-    if (tms_command == TMS_M0_DUMMY) {
-      M0_Dummy_Handler();
-    } else if (tms_command == TMS_M1_ADDR) {
-      M1_LoadAddress_Handler();
-    } else if (tms_command == TMS_M0_INCP) {
-      M0_IncPointer();
-    } else if (tms_command == (TMS_M0_DUMMY | TMS_M1_ADDR)) {
-      M1_Indirect_Handler();
-    } else if (tms_command == (TMS_M0_INCP | TMS_M1_ADDR)) {
-      // Bad indirect address, reset
-      readState = RD_INIT;
-    } else {
-      GPIO_ClrPin(GPIOA, LED_Green_Pin);
-      GPIO_ClrPin(GPIOA, LED_Red_Pin);
-    }
-    tms_command = TMS_NONE;
-  }
+  clock_handler();
 }
+
+#endif
+

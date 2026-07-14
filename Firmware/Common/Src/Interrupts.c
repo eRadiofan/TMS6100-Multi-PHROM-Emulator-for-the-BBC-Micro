@@ -6,8 +6,11 @@
  */
 
 #include "main.h"
+#ifdef STM32C051xx
+#include "stm32c0xx_it.h"
+#else
 #include "stm32g0xx_it.h"
-
+#endif
 /******************************************************************************/
 /*           Cortex-M0+ Processor Interruption and Exception Handlers          */
 /******************************************************************************/
